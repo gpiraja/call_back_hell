@@ -11,24 +11,25 @@ MongoClient.connect(url, (err, client) => {
     const db = client.db(dbname);
     const collection = db.collection("receitas");
 
-    collection.insertOne ({"nome" : "Joao", "desc": "Cara de mamão"},
-    (err, result) => {
-        assert.equal(err, null);
-        console.log('Registro adicionado ao db: \n');
-        console.log(result.insertedId);
-
-        collection.find({}).toArray((err, docs) =>{
+    collection.insertOne({
+            "nome": "Joao",
+            "desc": "Cara de mamão"
+        },
+        (err, result) => {
             assert.equal(err, null);
+            console.log('Registro adicionado ao db: \n');
+            console.log(result.insertedId);
 
-            console.log("Registros db:\n");
-            console.log(docs);
+            collection.find({}).toArray((err, docs) => {
+                assert.equal(err, null);
 
-            //db.dropCollection("receitas", (err, result) =>{
-              //  assert.equal(err, null);
-               // client.close();
-            //})
-        });
-    });
+                console.log("Registros db:\n");
+                console.log(docs);
+
+                db.dropCollection("receitas", (err, result) => {
+                    assert.equal(err, null);
+                    client.close();
+                })
+            });
+     });
 });
-
-
