@@ -5,33 +5,28 @@ const dboper = require('./operations')
 const url = 'mongodb://localhost:27017/';
 const dbname = 'conFusion';
 
-MongoClient.connect(url, (err, client) => {
-    assert.equal(err, null);
+MongoClient.connect(url)
+.then ((client) => {
     console.log('Conectado corretamente no servidor');
-
     const db = client.db(dbname);
-    const collection = db.collection("receitas");
-
-    dboper.insertDocument(db, {nome : "Vadio", desc: "teste"},
-        "receitas", (result) => {
-            console.log("Inserindo receita ", result.ops);
-            
-            dboper.findDocuments(db, "receitas", (docs) => {
-                console.log("Achados: ", docs);
-
-                dboper.removeDocument (db, {nome : "Vadio", desc: "teste"}, 
-                "receitas",(result) =>{
-                    console.log("apagado ", result);
-                    db.dropCollection("receitas", (result) =>{
-                        console.log("Coleção apagada", result);
-
-                        client.close()
-                    })
-                } )
-            });
-
-
-        })
-
+    console.log("Conectado no banco : \n", db.s.namespace);
     
-});
+    dboper.insertDocument(db, {nome : "Vadio", desc: "teste"},
+        "receitas")
+    .then((result) => {
+            console.log("Inserindo receita ", result.insertedId);
+            
+            return dboper.findDocuments(db, "receitas")
+    })
+    .then ((docs) => {
+        console.log("Documentos encontrados:\n ", docs);
+
+        return db.dropCollection("receitas");
+    })
+    .then((result) =>{
+        console.log("Coleção apagada", result);
+        client.close();
+    })
+    .catch((err) => console.log(err));   
+})
+.catch((err) => console.log(err));
